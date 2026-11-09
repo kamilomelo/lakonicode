@@ -19,8 +19,8 @@ printf 'Downloading %s at %s\n' "$repo" "$ref" >&2
 curl -fsSL --retry 3 "$url" -o "$temporary/repo.tar.gz"
 mkdir "$temporary/repo"
 tar -xzf "$temporary/repo.tar.gz" -C "$temporary/repo" --strip-components=1
-[[ -f $temporary/repo/install.sh && -f $temporary/repo/kartouche.sh ]] || {
-    printf '%s\n' 'Download is missing the installer or kartouche template' >&2
+[[ -f $temporary/repo/install.sh ]] || {
+    printf '%s\n' 'Download is missing the installer' >&2
     exit 1
 }
 bash "$temporary/repo/install.sh" "$@"

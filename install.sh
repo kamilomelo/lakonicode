@@ -2,7 +2,6 @@
 set -euo pipefail
 
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-source "$root/kartouche.sh"
 
 usage() {
     cat <<'EOF'
@@ -36,6 +35,23 @@ if [[ $replace == true && $apply == false ]]; then
     printf '%s\n' '--replace requires --apply' >&2
     exit 2
 fi
+
+for program in curl mktemp; do
+    command -v "$program" >/dev/null || { printf 'Missing required command: %s\n' "$program" >&2; exit 1; }
+done
+temp=
+formatter=$(mktemp "${TMPDIR:-/tmp}/lakonicode-formatter.XXXXXXXX")
+cleanup() {
+    [[ -z $temp ]] || rm -f -- "$temp"
+    rm -f -- "$formatter"
+}
+trap cleanup EXIT
+curl -fsSL --retry 3 https://raw.githubusercontent.com/kamilomelo/kartouche/main/bash/kartouche.sh -o "$formatter"
+source "$formatter"
+KT_NAME=lakonicode
+KT_VERSION=0.1.0
+KT_DESCRIPTION='OpenCode file installer'
+KT_PAUSE_SECONDS=0
 
 command -v sha256sum >/dev/null || { printf '%s\n' 'sha256sum is required' >&2; exit 1; }
 config=${XDG_CONFIG_HOME:-$HOME/.config}/opencode
@@ -130,8 +146,6 @@ if (( conflicts )) && [[ $replace == false ]]; then
 fi
 
 changed=false
-temp=
-trap '[[ -z $temp ]] || rm -f -- "$temp"' EXIT
 for path in "${files[@]}"; do
     target=$config/$path
     case ${actions[$path]} in
