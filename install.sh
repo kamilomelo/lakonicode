@@ -5,34 +5,27 @@ root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run | --apply [--replace]]
+Usage: ./install.sh [--dry-run | --replace]
 
 With no options, install new files and safely update unchanged managed files.
   --dry-run  Preview changes without writing anything.
-  --apply    Explicit alias for the default behavior.
-  --replace  With --apply, also back up and replace locally changed or unowned files.
+  --replace  Back up and replace locally changed or unowned files.
 
 Only the listed OpenCode files are managed. No files are removed.
 EOF
 }
 
-apply=true replace=false dry_run=false explicit_apply=false
+apply=true replace=false
 for arg in "$@"; do
     case $arg in
-        --apply) explicit_apply=true ;;
-        --dry-run) dry_run=true ;;
+        --dry-run) apply=false ;;
         --replace) replace=true ;;
         -h|--help) usage; exit 0 ;;
         *) usage >&2; exit 2 ;;
     esac
 done
-if [[ $dry_run == true && $explicit_apply == true ]]; then
-    printf '%s\n' '--dry-run and --apply cannot be combined' >&2
-    exit 2
-fi
-[[ $dry_run == false ]] || apply=false
 if [[ $replace == true && $apply == false ]]; then
-    printf '%s\n' '--replace requires --apply' >&2
+    printf '%s\n' '--dry-run and --replace cannot be combined' >&2
     exit 2
 fi
 
@@ -137,11 +130,11 @@ if (( blocked )); then
     exit 1
 fi
 if [[ $apply == false ]]; then
-    printf 'Run ./install.sh --apply to install; use --apply --replace for conflicts.\n' >&2
+    printf 'Run ./install.sh to install; use --replace for conflicts.\n' >&2
     exit 0
 fi
 if (( conflicts )) && [[ $replace == false ]]; then
-    printf 'No changes made: %d conflict(s). Review them before using --apply --replace.\n' "$conflicts" >&2
+    printf 'No changes made: %d conflict(s). Review them before using --replace.\n' "$conflicts" >&2
     exit 1
 fi
 

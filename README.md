@@ -56,8 +56,7 @@ setting. The review and audit commands report findings; they do not edit files.
 
 ```bash
 ./install.sh --dry-run         # preview without writing files
-./install.sh --apply           # explicit form of the default ./install.sh
-./install.sh --apply --replace # back up and replace conflicting files
+./install.sh --replace         # back up and replace conflicting files
 ```
 
 The installer records managed file hashes in
@@ -68,7 +67,7 @@ installation, a normal run backs up the old file and updates it.
 
 If a target is unowned and different, or you edited a managed target locally,
 a normal run reports a conflict and makes **no changes**. Inspect it before
-choosing `--apply --replace`. Symlink and non-file targets are refused even
+choosing `--replace`. Symlink and non-file targets are refused even
 with `--replace`.
 
 Backups are placed beside replaced files with a `.bak.*` suffix. The installer
